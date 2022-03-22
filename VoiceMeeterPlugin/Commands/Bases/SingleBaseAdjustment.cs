@@ -25,7 +25,7 @@
         private Boolean IsStrip { get; }
         private Int32 MaxValue { get; }
         private Int32 MinValue { get; }
-        private Int32 ValueToAdd { get; }
+        private Int32 LoupeNoNegativeValueToAdd { get; }
         public Boolean IsRealClass { get; set; }
 
         public SingleBaseAdjustment(Boolean hasRestart, Boolean isRealClass, Boolean isStrip, Int32 minValue = 0,
@@ -38,11 +38,7 @@
             this.MaxValue = maxValue < 0 ? maxValue * -1 : maxValue;
 
             if (minValue < 0)
-            {
-                this.ValueToAdd = this.MinValue * -1;
-                this.MaxValue += this.ValueToAdd;
-                this.MinValue = 0;
-            }
+                this.LoupeNoNegativeValueToAdd = this.MinValue * -1;
 
             if (!this.IsRealClass)
             {
@@ -87,11 +83,13 @@
                         $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}");
             }
 
+            if (loaded)
             this.AdjustmentValueChanged();
         }
-
+        protected bool loaded;
         protected override Boolean OnLoad()
         {
+            loaded = true;
             if (!this.IsRealClass)
             {
                 return base.OnLoad();
@@ -147,9 +145,13 @@
             {
                 return;
             }
-
+            var newVal = this.Actions[index] + diff;
+            if (newVal < MinValue)
+                newVal = MinValue;
+            if (newVal > MaxValue)
+                newVal = MaxValue;
             Remote.SetParameter($"{(this.IsStrip ? "Strip" : "Bus")}[{index + this.Offset}].{this.Command}",
-                this.Actions[index] + diff);
+                newVal);
 
             this.AdjustmentValueChanged(actionParameter);
         }
@@ -172,7 +174,7 @@
             var g = Graphics.FromImage(bitmap);
 
             var currentValue = this.Actions[index];
-            var percentage = (currentValue + this.ValueToAdd - this.MinValue) / (this.MaxValue - this.MinValue) * 100;
+            var percentage = (currentValue - this.MinValue) / (this.MaxValue - this.MinValue) * 100;
 
             var bgColor = Color.FromArgb(156, 156, 156);
             var textColor = Color.White;
@@ -191,7 +193,7 @@
 
             var ms = new MemoryStream();
             bitmap.Save(ms, ImageFormat.Png);
-            return new BitmapImage(ms.ToArray());
+            return BitmapImage.FromArray(ms.ToArray());
         }
 
         private Int32 GetButton(String actionParameter)
