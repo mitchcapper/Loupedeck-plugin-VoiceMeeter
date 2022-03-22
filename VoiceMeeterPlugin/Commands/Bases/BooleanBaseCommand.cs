@@ -60,7 +60,7 @@
                     var name = Remote.GetTextParameter($"{(this.IsStrip ? "Strip" : "Bus")}[{hi + this.Offset}].Label");
                     var groupName = String.IsNullOrEmpty(name) ? this.IsStrip ? "Strip" : "Bus" : name;
                     this.AddParameter(
-                        $"VM-Strip{hi}-{cmd}{special}",
+                        GetActionParameterName(hi,cmd,special),
                         $"{this.DisplayName}{special}",
                         $"{groupName} ({hi + 1 + this.Offset})",
                         "Input"
@@ -88,7 +88,7 @@
                 var name = Remote.GetTextParameter($"{(this.IsStrip ? "Strip" : "Bus")}[{hi + this.Offset}].Label");
                 var groupName = String.IsNullOrEmpty(name) ? this.IsStrip ? "Strip" : "Bus" : name;
                 this.AddParameter(
-                    $"VM-Strip{hi}-{cmd}2147483647",
+                    GetActionParameterName(hi,cmd),
                     this.DisplayName,
                     $"{groupName} ({hi + 1 + this.Offset})",
                     "Input"
@@ -96,6 +96,13 @@
             }
 
             this.GetNewSettings();
+        }
+        private static String GetActionParameterName(Int32 stripNumber, String cmd, Int32? specialNumber=null)
+        {
+            if (specialNumber == null)
+                return $"VM-Strip{stripNumber}-{cmd}2147483647";
+            else
+                return $"VM-Strip{stripNumber}-{cmd}{specialNumber.Value}";
         }
 
         private void GetNewSettings()
@@ -107,25 +114,30 @@
                     var hi = this.Actions[hiIndex];
                     for (var index = 1; index <= hi.Length; index++)
                     {
+                        var old = hi[index - 1];
                         hi[index - 1] =
                             (Int32)Remote.GetParameter(
                                 $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}{index}") ==
                             1;
+                        if (old != hi[index - 1])
+                            this.ActionImageChanged(GetActionParameterName(index, this.Command, hiIndex));
                     }
                 }
             }
             else
             {
-                var hiArray = this.Actions[0];
-                for (var hiIndex = 0; hiIndex < hiArray.Length; hiIndex++)
+                var hi = this.Actions[0];
+                for (var index = 0; index < hi.Length; index++)
                 {
-                    hiArray[hiIndex] =
+                    var old = hi[index];
+                    hi[index] =
                         (Int32)Remote.GetParameter(
-                            $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}") == 1;
+                            $"{(this.IsStrip ? "Strip" : "Bus")}[{index + this.Offset}].{this.Command}") == 1;
+                    if (old != hi[index])
+                        this.ActionImageChanged(GetActionParameterName(index, this.Command));
                 }
             }
 
-            this.ActionImageChanged();
         }
 
         protected override Boolean OnLoad()
