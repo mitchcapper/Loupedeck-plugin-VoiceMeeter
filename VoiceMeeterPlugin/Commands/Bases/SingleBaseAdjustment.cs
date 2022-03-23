@@ -89,8 +89,10 @@
                     (Int32)Remote.GetParameter(
                         $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}");
 
-                if (old != this.Actions[hiIndex])
+                if (this.Loaded && old != this.Actions[hiIndex])
+                {
                     this.AdjustmentValueChanged(GetActionParameterName(hiIndex,this.Command));
+                }
             }
 
             

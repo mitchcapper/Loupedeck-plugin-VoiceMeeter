@@ -98,13 +98,9 @@
 
             this.GetNewSettings();
         }
-        private static String GetActionParameterName(Int32 stripNumber, String cmd, Int32? specialNumber=null)
-        {
-            if (specialNumber == null)
-                return $"VM-Strip{stripNumber}-{cmd}2147483647";
-            else
-                return $"VM-Strip{stripNumber}-{cmd}{specialNumber.Value}";
-        }
+        private static String GetActionParameterName(Int32 stripNumber, String cmd, Int32? specialNumber = null) =>
+            specialNumber == null ? $"VM-Strip{stripNumber}-{cmd}2147483647" : $"VM-Strip{stripNumber}-{cmd}{specialNumber.Value}";
+        
 
         private void GetNewSettings()
         {
@@ -120,8 +116,10 @@
                             (Int32)Remote.GetParameter(
                                 $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}{index}") ==
                             1;
-                        if (old != hi[index - 1])
+                        if (this.Loaded && old != hi[index - 1])
+                        {
                             this.ActionImageChanged(GetActionParameterName(index, this.Command, hiIndex));
+                        }
                     }
                 }
             }
@@ -134,8 +132,10 @@
                     hi[index] =
                         (Int32)Remote.GetParameter(
                             $"{(this.IsStrip ? "Strip" : "Bus")}[{index + this.Offset}].{this.Command}") == 1;
-                    if (old != hi[index])
+                    if (this.Loaded && old != hi[index])
+                    {
                         this.ActionImageChanged(GetActionParameterName(index, this.Command));
+                    }
                 }
             }
 
