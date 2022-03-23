@@ -27,6 +27,7 @@
         private Int32 MinValue { get; }
         private Int32 LoupeNoNegativeValueToAdd { get; }
         public Boolean IsRealClass { get; set; }
+        protected Boolean Loaded { get; set; }
 
         public SingleBaseAdjustment(Boolean hasRestart, Boolean isRealClass, Boolean isStrip, Int32 minValue = 0,
             Int32 maxValue = 10) : base(hasRestart)
@@ -38,7 +39,9 @@
             this.MaxValue = maxValue < 0 ? maxValue * -1 : maxValue;
 
             if (minValue < 0)
+            {
                 this.LoupeNoNegativeValueToAdd = this.MinValue * -1;
+            }
 
             if (!this.IsRealClass)
             {
@@ -83,13 +86,15 @@
                         $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}");
             }
 
-            if (loaded)
-            this.AdjustmentValueChanged();
+            if (this.Loaded)
+            {
+                this.AdjustmentValueChanged();
+            }
         }
-        protected bool loaded;
+
         protected override Boolean OnLoad()
         {
-            loaded = true;
+            this.Loaded = true;
             if (!this.IsRealClass)
             {
                 return base.OnLoad();
@@ -146,10 +151,16 @@
                 return;
             }
             var newVal = this.Actions[index] + diff;
-            if (newVal < MinValue)
-                newVal = MinValue;
-            if (newVal > MaxValue)
-                newVal = MaxValue;
+            if (newVal < this.MinValue)
+            {
+                newVal = this.MinValue;
+            }
+
+            if (newVal > this.MaxValue)
+            {
+                newVal = this.MaxValue;
+            }
+
             Remote.SetParameter($"{(this.IsStrip ? "Strip" : "Bus")}[{index + this.Offset}].{this.Command}",
                 newVal);
 

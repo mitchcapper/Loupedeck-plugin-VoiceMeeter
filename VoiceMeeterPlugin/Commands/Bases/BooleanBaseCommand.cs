@@ -23,6 +23,7 @@
         public Boolean IsRealClass { get; set; }
         private Boolean IsStrip { get; }
         private Int32 Offset { get; set; }
+        protected Boolean Loaded { get; set; }
 
         public BooleanBaseCommand(Boolean isRealClass, Boolean isStrip)
         {
@@ -120,13 +121,14 @@
                             $"{(this.IsStrip ? "Strip" : "Bus")}[{hiIndex + this.Offset}].{this.Command}") == 1;
                 }
             }
-            if (loaded)
+            if (this.Loaded)
+            {
                 this.ActionImageChanged();
+            }
         }
-        protected bool loaded;
         protected override Boolean OnLoad()
         {
-            loaded = true;
+            this.Loaded = true;
             if (!this.IsRealClass)
             {
                 return base.OnLoad();
