@@ -27,6 +27,7 @@
         private Int32 MinValue { get; }
         private Int32 ValueToAdd { get; }
         public Boolean IsRealClass { get; set; }
+        protected Boolean Loaded { get; set; }
 
         public SingleBaseAdjustment(Boolean hasRestart, Boolean isRealClass, Boolean isStrip, Int32 minValue = 0,
             Int32 maxValue = 10) : base(hasRestart)
@@ -96,6 +97,7 @@
         }
         protected override Boolean OnLoad()
         {
+        	this.Loaded = true;
             if (!this.IsRealClass)
             {
                 return base.OnLoad();
@@ -195,7 +197,7 @@
 
             var ms = new MemoryStream();
             bitmap.Save(ms, ImageFormat.Png);
-            return new BitmapImage(ms.ToArray());
+            return BitmapImage.FromArray(ms.ToArray());
         }
 
         private Int32 GetButton(String actionParameter)
