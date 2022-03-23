@@ -25,7 +25,6 @@
         private Boolean IsStrip { get; }
         private Int32 MaxValue { get; }
         private Int32 MinValue { get; }
-        private Int32 LoupeNoNegativeValueToAdd { get; }
         public Boolean IsRealClass { get; set; }
         protected Boolean Loaded { get; set; }
 
@@ -37,11 +36,6 @@
 
             this.MinValue = minValue;
             this.MaxValue = maxValue < 0 ? maxValue * -1 : maxValue;
-
-            if (minValue < 0)
-            {
-                this.LoupeNoNegativeValueToAdd = this.MinValue * -1;
-            }
 
             if (!this.IsRealClass)
             {
